@@ -1,0 +1,8 @@
+{
+  "src": [
+    "pages/Index",
+    "pages/rules/RuleCreatePage",
+    "pages/rules/RuleDetailPage",
+    "pages/rules/RuleEditPage"
+  ]
+}
