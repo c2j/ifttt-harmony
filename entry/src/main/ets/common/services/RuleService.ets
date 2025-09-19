@@ -355,55 +355,100 @@ export class RuleService {
   /**
    * 创建新规则
    */
-  async createRule(rule: CreateRuleInput): Promise<Rule>;
-  async createRule(rule: Rule): Promise<boolean>;
-  async createRule(rule: CreateRuleInput | Rule): Promise<Rule | boolean> {
-    if ((rule as Rule).id !== undefined) {
-      // 如果是 Rule 对象（有 id 属性）
-      const ruleObj = rule as Rule;
-      const newRule: Rule = {
-        id: ruleObj.id || this.generateId(),
-        name: ruleObj.name,
-        description: ruleObj.description,
-        enabled: ruleObj.enabled,
-        status: ruleObj.status,
-        createdAt: ruleObj.createdAt || Date.now(),
-        updatedAt: Date.now(),
-        lastExecuted: ruleObj.lastExecuted,
-        executionCount: ruleObj.executionCount || 0,
-        successCount: ruleObj.successCount || 0,
-        failureCount: ruleObj.failureCount || 0,
-        trigger: ruleObj.trigger,
-        conditions: ruleObj.conditions,
-        actions: ruleObj.actions
-      };
+  async createRule(rule: CreateRuleInput): Promise<Rule> {
+    const newRule: Rule = {
+      id: this.generateId(),
+      name: rule.name,
+      description: rule.description,
+      enabled: rule.enabled,
+      status: rule.status,
+      createdAt: Date.now(),
+      updatedAt: Date.now(),
+      lastExecuted: rule.lastExecuted,
+      executionCount: 0,
+      successCount: 0,
+      failureCount: 0,
+      trigger: rule.trigger,
+      conditions: rule.conditions,
+      actions: rule.actions
+    };
 
-      this.rules.set(newRule.id, newRule);
-      console.info(`[RuleService] Created rule: ${newRule.name}`);
-      return true;
-    } else {
-      // 如果是 CreateRuleInput 对象
-      const newRule: Rule = {
-        id: this.generateId(),
-        name: rule.name,
-        description: rule.description,
-        enabled: rule.enabled,
-        status: rule.status,
-        createdAt: Date.now(),
-        updatedAt: Date.now(),
-        lastExecuted: rule.lastExecuted,
-        executionCount: 0,
-        successCount: 0,
-        failureCount: 0,
-        trigger: rule.trigger,
-        conditions: rule.conditions,
-        actions: rule.actions
-      };
+    this.rules.set(newRule.id, newRule);
+    console.info(`[RuleService] Created rule: ${newRule.name}`);
+    return newRule;
+  }
 
-      this.rules.set(newRule.id, newRule);
-      console.info(`[RuleService] Created rule: ${newRule.name}`);
-      return newRule;
-    }
+  /**
+   * 简单创建规则方法
+   */
+  async createSimpleRule(name: string, description: string, triggerName: string, actionName: string): Promise<Rule> {
+    const trigger: RuleTrigger = {
+      id: `trigger_${Date.now()}`,
+      type: TriggerType.MANUAL,
+      pluginId: 'system',
+      pluginName: '系统',
+      name: triggerName,
+      config: {},
+      enabled: true
+    };
+
+    const action: RuleAction = {
+      id: `action_${Date.now()}`,
+      type: ActionType.NOTIFICATION,
+      pluginId: 'system',
+      pluginName: '系统',
+      name: actionName,
+      config: {},
+      enabled: true,
+      order: 1
+    };
+
+    const newRule: Rule = {
+      id: this.generateId(),
+      name: name,
+      description: description,
+      enabled: true,
+      status: RuleStatus.ENABLED,
+      createdAt: Date.now(),
+      updatedAt: Date.now(),
+      lastExecuted: undefined,
+      executionCount: 0,
+      successCount: 0,
+      failureCount: 0,
+      trigger: trigger,
+      conditions: [],
+      actions: [action]
+    };
+
+    this.rules.set(newRule.id, newRule);
+    console.info(`[RuleService] Created simple rule: ${newRule.name}`);
+    return newRule;
+  }
+
+  /**
+   * 创建新规则（从完整Rule对象）
+   */
+  async createRuleFromObject(rule: Rule): Promise<boolean> {
+    const newRule: Rule = {
+      id: rule.id || this.generateId(),
+      name: rule.name,
+      description: rule.description,
+      enabled: rule.enabled,
+      status: rule.status,
+      createdAt: rule.createdAt || Date.now(),
+      updatedAt: Date.now(),
+      lastExecuted: rule.lastExecuted,
+      executionCount: rule.executionCount || 0,
+      successCount: rule.successCount || 0,
+      failureCount: rule.failureCount || 0,
+      trigger: rule.trigger,
+      conditions: rule.conditions,
+      actions: rule.actions
+    };
+
+    this.rules.set(newRule.id, newRule);
+    console.info(`[RuleService] Created rule: ${newRule.name}`);
+    return true;
   }
 
   /**

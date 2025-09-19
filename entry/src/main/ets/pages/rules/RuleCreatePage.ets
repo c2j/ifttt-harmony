@@ -4,6 +4,20 @@ import { RouteUtils } from '../../common/router/Router';
 import { LoadingComponent } from '../../common/components/LoadingComponent';
 
 /**
+ * 创建规则输入接口
+ */
+interface CreateRuleInput {
+  name: string;
+  description?: string;
+  enabled: boolean;
+  status: RuleStatus;
+  lastExecuted?: number;
+  trigger: RuleTrigger;
+  conditions: RuleCondition[];
+  actions: RuleAction[];
+}
+
+/**
  * 创建规则页面
  */
 @Entry
@@ -36,25 +50,13 @@ export struct RuleCreatePage {
     this.isLoading = true;
     
     try {
-      const newRule: Rule = {
-        id: `rule_${Date.now()}`,
-        name: this.ruleName.trim(),
-        description: this.ruleDescription.trim(),
-        status: RuleStatus.ENABLED,
-        enabled: true,
-        createdAt: Date.now(),
-        updatedAt: Date.now(),
-        lastExecuted: undefined,
-        executionCount: 0,
-        successCount: 0,
-        failureCount: 0,
-        trigger: this.createTrigger(),
-        conditions: [],
-        actions: [this.createAction()]
-      };
-
-      const success = await ruleService.createRule(newRule);
-      if (success) {
+      const createdRule = await ruleService.createSimpleRule(
+        this.ruleName.trim(),
+        this.ruleDescription.trim(),
+        this.selectedTrigger,
+        this.selectedAction
+      );
+      if (createdRule) {
         console.info('规则创建成功');
         RouteUtils.back();
       }
@@ -93,6 +95,21 @@ export struct RuleCreatePage {
       config: {},
       enabled: true,
       order: 1
+    };
+  }
+
+  /**
+   * 创建规则输入对象
+   */
+  private createRuleInput(): CreateRuleInput {
+    return {
+      name: this.ruleName.trim(),
+      description: this.ruleDescription.trim(),
+      status: RuleStatus.ENABLED,
+      enabled: true,
+      trigger: this.createTrigger(),
+      conditions: [],
+      actions: [this.createAction()]
     };
   }
 

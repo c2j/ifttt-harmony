@@ -1,4 +1,4 @@
-import { Rule, RuleStatus } from '../../common/types/RuleTypes';
+import { Rule, RuleStatus, RuleAction } from '../../common/types/RuleTypes';
 import { ruleService } from '../../common/services/RuleService';
 import { RouteUtils } from '../../common/router/Router';
 import { LoadingComponent } from '../../common/components/LoadingComponent';
@@ -289,7 +289,7 @@ export struct RuleEditPage {
                 .fontWeight(FontWeight.Bold)
                 .margin({ bottom: 12 })
 
-              ForEach(this.rule.actions, (action) => {
+              ForEach(this.rule.actions, (action: RuleAction) => {
                 Column() {
                   Row() {
                     Text(action.name)
